@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:todo/view/add_task.dart';
+import 'package:todo/viewModel/todo_view_model.dart';
 
 class Task extends StatefulWidget {
   const Task({
@@ -24,13 +26,13 @@ class _TaskState extends State<Task> {
   }
 }
 
-class detailTask extends StatelessWidget {
+class detailTask extends ConsumerWidget {
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(
-          title: const Text('TaskApp'),
+          title: Text(ref.watch(taskTitleProvider)),
         ),
         body: ListView(
           children: const <Widget>[
