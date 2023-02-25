@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:todo/view/task.dart';
+import 'package:todo/viewModel/todo_view_model.dart';
 
 class AddTask extends StatefulWidget {
   const AddTask({Key? key}) : super(key: key);
@@ -9,17 +11,38 @@ class AddTask extends StatefulWidget {
 }
 
 class _AddTaskState extends State<AddTask> {
-  // タイトル
-  late String title = "";
-  // 内容
-  late String description = "";
-
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      home: _AddTaskPage(),
+    );
+  }
+}
+
+class _AddTaskPage extends ConsumerWidget {
+  // titleのcontrollerをStateProviderで定義する
+  final titleControllerStateProvider = StateProvider.autoDispose((ref) {
+    return TextEditingController(text: '');
+  });
+
+  // 内容のcontrollerをStateProviderで定義する
+  final descriptionControllerStateProvider = StateProvider.autoDispose((ref) {
+    return TextEditingController(text: '');
+  });
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    // titleのテキストフィールド値を監視
+    final titleControllerProvider = ref.watch(titleControllerStateProvider);
+
+    // descriptionのテキストフィールド値を監視
+    final descriptionControllerProvider =
+        ref.watch(descriptionControllerStateProvider);
+
+    return MaterialApp(
       home: Scaffold(
         appBar: AppBar(
-          title: const Text('タスク'),
+          title: Text(ref.watch(addTaskTitleProvider)),
         ),
         body: Container(
           padding: const EdgeInsets.all(20),
@@ -28,14 +51,7 @@ class _AddTaskState extends State<AddTask> {
             children: [
               // タイトルテキスト
               TextFormField(
-                // 入力されたテキストの値を受け取る（valueが入力されたテキスト）
-                onChanged: (String value) {
-                  // データが変更したことを知らせる（画面を更新する）
-                  setState(() {
-                    // データを変更
-                    title = value;
-                  });
-                },
+                controller: titleControllerProvider,
                 decoration: const InputDecoration(
                   border: UnderlineInputBorder(),
                   hintText: 'タイトル',
@@ -44,14 +60,7 @@ class _AddTaskState extends State<AddTask> {
               const SizedBox(height: 10),
               // 内容テキスト
               TextFormField(
-                // 入力されたテキストの値を受け取る（valueが入力されたテキスト）
-                onChanged: (String value) {
-                  // データが変更したことを知らせる（画面を更新する）
-                  setState(() {
-                    // データを変更
-                    description = value;
-                  });
-                },
+                controller: descriptionControllerProvider,
                 decoration: const InputDecoration(
                   border: UnderlineInputBorder(),
                   hintText: '内容',
@@ -63,13 +72,14 @@ class _AddTaskState extends State<AddTask> {
                 width: 120,
                 child: ElevatedButton(
                   onPressed: () {
-                    // "pop"で前の画面に戻る
-                    // "pop"の引数から前の画面にデータを渡す
+                    print('title：${titleControllerProvider.text}');
+                    print('description：${descriptionControllerProvider.text}');
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                          builder: (context) =>
-                              Task(title: title, description: description)),
+                          builder: (context) => Task(
+                              title: titleControllerProvider.text,
+                              description: descriptionControllerProvider.text)),
                     );
                   },
                   child: const Text('決定'),
